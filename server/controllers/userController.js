@@ -45,8 +45,7 @@ const registerUser = async (req, res) => {
   console.log("BODY:", req.body)
 };
 
-// @desc    Login an existing user
-// @route   POST /api/users/login
+
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 

@@ -26,9 +26,7 @@ const addFood = async (req, res) => {
   }
 };
 
-// @desc    Get all food entries for the logged-in user
-// @route   GET /api/food
-// @access  Private
+
 const getUserFood = async (req, res) => {
   try {
     const foods = await Food.find({ user: req.user.id }).sort({ date: -1 });
@@ -39,9 +37,7 @@ const getUserFood = async (req, res) => {
   }
 };
 
-// @desc    Delete a specific food entry
-// @route   DELETE /api/food/:id
-// @access  Private
+
 const deleteFood = async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
