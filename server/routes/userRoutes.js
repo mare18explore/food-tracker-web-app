@@ -5,10 +5,10 @@ const router = express.Router();
 // Import controller functions
 const { registerUser, loginUser } = require('../controllers/userController');
 
-// POST /api/users/register → Create a new user
+// Route to register a new user
 router.post('/register', registerUser);
 
-// POST /api/users/login → Login existing user
+// Route to log in an existing user
 router.post('/login', loginUser);
 
 // Export the router to use in server.js
