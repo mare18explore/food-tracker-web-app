@@ -3,6 +3,7 @@
     <h2>Register</h2>
 
     <form @submit.prevent="registerUser">
+      <input v-model="name" type="text" placeholder="Name" required />
       <input v-model="email" type="email" placeholder="Email" required />
       <input
         v-model="password"
@@ -17,37 +18,35 @@
       Already have an account?
       <router-link to="/login">Login</router-link>
     </p>
+
+    <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
   </div>
 </template>
 
 <script>
-// Importing the service that handles registration
-import AuthService from "../services/AuthService";
+import AuthService from "@/services/AuthService";
 
 export default {
-  name: "RegisterView",
-
+  name: "RegisterPage",
   data() {
     return {
+      name: "",
       email: "",
       password: "",
+      errorMessage: "",
     };
   },
-
   methods: {
     async registerUser() {
-      // Log email to check form is wired up correctly
-      console.log("Attempting to register user:", this.email);
-
       try {
-        await AuthService.register(this.email, this.password);
-        console.log("Registration successful");
-
-        // Redirect to login page after registration
-        this.$router.push("/login");
+        console.log("Attempting to register user:", this.email);
+        await AuthService.register(this.name, this.email, this.password);
+        // Success handling (e.g. route to dashboard or show message)
       } catch (err) {
-        console.error("Registration failed:", err.message || err);
-        alert("Could not register. Try again.");
+        console.error("Full error:", err);
+        this.errorMessage =
+          "Registration failed: " +
+          (err.response?.data?.msg || err.message || "Unknown error");
       }
     },
   },

@@ -2,6 +2,7 @@
   <div class="auth-container">
     <h2>Login</h2>
 
+    <!-- Login form -->
     <form @submit.prevent="loginUser">
       <input v-model="email" type="email" placeholder="Email" required />
       <input
@@ -13,6 +14,7 @@
       <button type="submit">Login</button>
     </form>
 
+    <!-- Link to register page -->
     <p>
       Don't have an account?
       <router-link to="/register">Register</router-link>
@@ -21,7 +23,7 @@
 </template>
 
 <script>
-// Importing the auth service functions for login
+// AuthService handles API calls to the backend
 import AuthService from "../services/AuthService";
 
 export default {
@@ -36,18 +38,23 @@ export default {
 
   methods: {
     async loginUser() {
-      // Quick console check for input values before API call
+      // Log the email to confirm binding works
       console.log("Trying to log in with:", this.email);
 
       try {
+        // Send login request to backend
         const res = await AuthService.login(this.email, this.password);
-        console.log("Login successful");
-        console.log("Login response:", res);
 
-        // Navigate to home or dashboard after login
-        this.$router.push("/");
+        // If the backend returns a token, store it in localStorage
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
+
+        // Redirect to dashboard after successful login
+        this.$router.push("/dashboard");
       } catch (err) {
-        console.error("Login failed:", err.message || err);
+        // Show error message if login fails
+        console.error("Login failed:", err.response?.data?.message || err);
         alert("Login failed. Check your credentials.");
       }
     },

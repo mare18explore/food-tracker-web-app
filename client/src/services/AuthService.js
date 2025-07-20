@@ -1,18 +1,18 @@
-// Import our pre-configured Axios instance
+// client/src/services/AuthService.js
+
 import axios from "../axios";
-//no token stuff handled here yet
+
 const AuthService = {
-  // Send POST request to backend to register a new user
-  register(email, password) {
-    return axios.post("/auth/register", {
+  register(name, email, password) {
+    return axios.post("/users/register", {
+      name,
       email,
       password,
     });
   },
 
-  // Send POST request to backend to log in a user
   login(email, password) {
-    return axios.post("/auth/login", {
+    return axios.post("/users/login", {
       email,
       password,
     });
