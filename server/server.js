@@ -19,7 +19,12 @@ const foodRoutes = require('./routes/foodRoutes');
 const app = express();
 
 // enable CORS so frontend (like Vue later) can send requests to backend
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:8080', // Vue frontend URL
+  credentials: true,               // allow cookies & headers
+};
+
+app.use(cors(corsOptions)); //credentials
 // allows us to read JSON from the request body (like user info)
 app.use(express.json());
 

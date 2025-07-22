@@ -51,7 +51,7 @@ const deleteFood = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this entry' });
     }
 
-    // 👇 Use deleteOne instead of remove
+  
     await food.deleteOne();
     res.json({ message: 'Food entry deleted' });
 
