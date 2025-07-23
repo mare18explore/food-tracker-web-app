@@ -30,7 +30,7 @@ app.use(express.json());
 
 // any route that starts with /api/users will go to userRoutes (e.g., /register, /login)
 app.use('/api/users', userRoutes);
-app.use('/api/food', foodRoutes); // 
+app.use('/api/foods', foodRoutes); // 
 
 
 // MongoDB connection/server work

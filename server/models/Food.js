@@ -33,6 +33,7 @@ const foodSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  mealType: { type: String, required: true },
 });
 
 // Export the model so we can use it in routes and controllers

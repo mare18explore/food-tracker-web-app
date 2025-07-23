@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// Bring in controller functions for each food route
 const {
   addFood,
   getUserFood,
@@ -9,15 +8,17 @@ const {
   updateFood,
 } = require('../controllers/foodController');
 
-// Middleware to protect routes (user must be logged in)
+// Middleware that attaches `req.user` (e.g., from JWT)
 const { protect } = require('../middleware/authMiddleware');
 
-// Handle POST (add) and GET (fetch) for food entries
-router.route('/')
-  .post(protect, addFood)
-  .get(protect, getUserFood);
+// Routes that use /api/foods as the base path in index.js
 
-// Handle PUT (update) and DELETE for specific food entries by ID
+// GET all foods for a user, POST a new food
+router.route('/')
+  .get(protect, getUserFood)
+  .post(protect, addFood);
+
+// PUT or DELETE a specific food entry
 router.route('/:id')
   .put(protect, updateFood)
   .delete(protect, deleteFood);
