@@ -107,17 +107,35 @@ export default {
       }
     },
 
-    // adds the selected food to the database
     async addFood(foodName) {
       try {
         const token = localStorage.getItem("token");
 
+        // Get macros from Nutritionix
+        const macroRes = await fetch(
+          "http://localhost:5050/api/foods/nutrition",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: foodName }),
+          }
+        );
+
+        const macroData = await macroRes.json();
+
+        if (!macroData.foods || !macroData.foods.length) {
+          alert("Sorry, no nutrition data found for that food.");
+          return;
+        }
+
+        const foodData = macroData.foods[0];
+
         const newFood = {
           name: foodName,
-          calories: 0,
-          protein: 0,
-          fat: 0,
-          carbs: 0,
+          calories: Math.round(foodData.nf_calories || 0),
+          protein: Math.round(foodData.nf_protein || 0),
+          fat: Math.round(foodData.nf_total_fat || 0),
+          carbs: Math.round(foodData.nf_total_carbohydrate || 0),
           mealType: this.mealTypes[foodName] || "Snack",
           quantity: 1,
         };
@@ -137,7 +155,6 @@ export default {
           return;
         }
 
-        // confirm and reset
         alert(`${newFood.name} added to ${newFood.mealType}!`);
         this.query = "";
         this.results = [];
@@ -153,6 +170,7 @@ export default {
 /* container box */
 .home-container {
   background: linear-gradient(to bottom right, #f0f4f8, #dfe9f3);
+  backdrop-filter: blur(4px);
   max-width: 500px;
   margin: 3rem auto;
   padding: 2rem;
@@ -196,6 +214,8 @@ button {
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
+  padding: 0.7rem;
+  font-size: 1rem;
   gap: 0.5rem;
 }
 
@@ -205,6 +225,7 @@ button {
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
+  border: 1px solid #ccc;
   text-align: left;
 }
 </style>

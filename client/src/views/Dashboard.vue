@@ -1,7 +1,15 @@
 <template>
   <div class="dashboard-container">
-    <h1>Dashboard</h1>
-
+    <h1><span style="font-size: 1.2em"></span> Dashboard</h1>
+    <h2><span style="font-size: 1.1em">🍽️</span> Today's Meals</h2>
+    <p v-if="isToday">Showing meals for: <strong>Today</strong></p>
+    <p v-else>Showing meals for: {{ selectedDate }}</p>
+    <div class="date-nav">
+      <button @click="prevDate">Previous ({{ formatRelativeDate(-1) }})</button>
+      <span>{{ formattedDate() }}</span>
+      <button @click="nextDate">Next ({{ formatRelativeDate(1) }})</button>
+    </div>
+    <button v-if="!isToday" @click="resetDate">Go Back To Today</button>
     <!-- Search for food using Nutritionix API -->
     <div class="nutrition-search">
       <input
@@ -103,22 +111,25 @@
       <p v-if="Object.keys(macrosByMeal).length === 0">
         No meals logged today yet.
       </p>
-      <div v-for="(meal, mealType) in macrosByMeal" :key="mealType">
+      <div v-for="mealType in mealTypesList" :key="mealType">
         <h3>{{ mealType }}</h3>
-        <div class="meal-totals-row">
-          <span>Calories: {{ meal.calories }} kcal</span>
-          <span>Protein: {{ meal.protein }} g</span>
-          <span>Fat: {{ meal.fat }} g</span>
-          <span>Carbs: {{ meal.carbs }} g</span>
+        <div class="meal-totals-row" v-if="macrosByMeal[mealType]">
+          <span>Calories: {{ macrosByMeal[mealType].calories }} kcal</span>
+          <span>Protein: {{ macrosByMeal[mealType].protein }} g</span>
+          <span>Fat: {{ macrosByMeal[mealType].fat }} g</span>
+          <span>Carbs: {{ macrosByMeal[mealType].carbs }} g</span>
         </div>
-        <ul v-if="meal.items.length === 0" class="empty-state">
-          <li>No foods added yet for {{ mealType }}.</li>
-        </ul>
-        <ul v-else>
-          <li v-for="item in meal.items" :key="item._id">
+        <ul
+          v-if="macrosByMeal[mealType] && macrosByMeal[mealType].items.length"
+        >
+          <li v-for="item in macrosByMeal[mealType].items" :key="item._id">
             {{ item.name }} ({{ item.quantity }}) - {{ item.calories }} kcal
             <button @click="deleteFood(item._id)">Delete</button>
           </li>
+        </ul>
+
+        <ul v-else class="empty-state">
+          <li>No foods added yet for {{ mealType }}.</li>
         </ul>
       </div>
     </section>
@@ -151,10 +162,26 @@ export default {
       searchQuery: "",
       searchResults: [],
       selectedFood: null,
+      mealTypesList: ["Breakfast", "Lunch", "Dinner", "Snack"],
+      selectedDate: new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .substring(0, 10),
     };
+  },
+  watch: {
+    selectedDate() {
+      this.fetchFoods();
+    },
   },
 
   computed: {
+    // to highlight date
+    isToday() {
+      const today = new Date().toISOString().substring(0, 10);
+      return this.selectedDate === today;
+    },
     // Daily macro totals
     totalCalories() {
       return this.foodEntries.reduce((sum, f) => sum + (f.calories || 0), 0);
@@ -198,6 +225,41 @@ export default {
   },
 
   methods: {
+    // Formats the currently selected date for display
+    formattedDate() {
+      const date = new Date(this.selectedDate + "T00:00:00");
+      return date.toDateString();
+    },
+
+    // Formats a relative date like "Previous" or "Next"
+    formatRelativeDate(offset) {
+      const base = new Date(this.selectedDate + "T00:00:00");
+      base.setDate(base.getDate() + offset);
+      return base.toDateString();
+    },
+    // changes to date to account for timezone
+    // Move to the next date
+    nextDate() {
+      const next = new Date(this.selectedDate);
+      next.setDate(next.getDate() + 1);
+      this.selectedDate = next.toISOString().substring(0, 10);
+    },
+
+    prevDate() {
+      const prev = new Date(this.selectedDate);
+      prev.setDate(prev.getDate() - 1);
+      this.selectedDate = prev.toISOString().substring(0, 10);
+    },
+
+    // Reset to today's date
+    resetDate() {
+      this.selectedDate = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .substring(0, 10);
+    },
+
     // Fetch macros for a selected food from search
     async selectFood(foodItem) {
       this.searchQuery = "";
@@ -243,6 +305,7 @@ export default {
         carbs: this.carbs,
         mealType: this.mealType,
         quantity: this.quantity,
+        date: this.selectedDate,
       };
 
       try {
@@ -301,9 +364,12 @@ export default {
     async fetchFoods() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5050/api/foods", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(
+          `http://localhost:5050/api/foods?date=${this.selectedDate}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const data = await response.json();
         this.foodEntries = [...data];
@@ -333,7 +399,7 @@ export default {
   max-width: 800px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background: #fff;
+  background: linear-gradient(to top right, #ffffff, #f5faff);
   border-radius: 12px;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
 }
@@ -365,16 +431,12 @@ select {
 
 /* Default button style */
 button {
-  padding: 0.6rem 1.2rem;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-weight: bold;
 }
 
 button:hover {
-  background-color: #2980b9;
+  transform: scale(1.05);
 }
 
 /* Section that displays each meal group */
@@ -455,6 +517,12 @@ li {
   margin-right: 0.5rem;
   margin-top: 1rem;
 }
+ul li {
+  cursor: pointer;
+}
+ul li:hover {
+  background-color: #dff0ff;
+}
 
 /* Displays total macros for each meal */
 .meal-totals-row {
@@ -473,5 +541,31 @@ li {
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
+}
+.totals-section {
+  background: #eef6ff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+.date-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.date-nav button {
+  padding: 0.4rem 0.8rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.date-nav button:hover {
+  background-color: #2980b9;
 }
 </style>

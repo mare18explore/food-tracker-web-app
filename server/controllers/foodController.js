@@ -25,6 +25,7 @@ const addFood = async (req, res) => {
       carbs,
       mealType,
       quantity,
+      date: req.body.date ? new Date(req.body.date) : new Date(),
     });
     console.log("Food saved to DB:", newFood);
     res.status(201).json(newFood);
@@ -37,12 +38,24 @@ const addFood = async (req, res) => {
 // Get all food entries for the currently logged-in user
 const getUserFood = async (req, res) => {
   try {
-    // Sort by most recent first
-    const foods = await Food.find({ user: req.user.id }).sort({ date: -1 });
+    const { date } = req.query;
+
+    const filter = { user: req.user.id };
+    if (date) {
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      filter.date = { $gte: dayStart, $lte: dayEnd };
+    }
+
+    const foods = await Food.find(filter).sort({ date: -1 });
     res.json(foods);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error when fetching food data' });
+    res.status(500).json({ message: "Server error when fetching food data" });
   }
 };
 
