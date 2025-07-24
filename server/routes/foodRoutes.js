@@ -1,26 +1,32 @@
 const express = require('express');
 const router = express.Router();
 
+// Import from foodController
 const {
   addFood,
   getUserFood,
   deleteFood,
   updateFood,
+  searchNutritionix,
 } = require('../controllers/foodController');
 
-// Middleware that attaches `req.user` (e.g., from JWT)
+// Import from nutritionController
+const { getNutrition } = require('../controllers/nutritionController');
+
+// Middleware
 const { protect } = require('../middleware/authMiddleware');
 
-// Routes that use /api/foods as the base path in index.js
-
-// GET all foods for a user, POST a new food
+// Routes
 router.route('/')
   .get(protect, getUserFood)
   .post(protect, addFood);
 
-// PUT or DELETE a specific food entry
 router.route('/:id')
   .put(protect, updateFood)
   .delete(protect, deleteFood);
+
+// Public search routes
+router.get('/search/:query', searchNutritionix);
+router.post('/nutrition', getNutrition); 
 
 module.exports = router;

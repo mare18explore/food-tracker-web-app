@@ -27,6 +27,15 @@ const foodSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  fat: { 
+    type: Number, 
+    default: 0 
+  },
+
+  carbs: { 
+    type: Number, 
+    default: 0 
+  },
 
   // Date the food was eaten/tracked (defaults to now)
   date: {

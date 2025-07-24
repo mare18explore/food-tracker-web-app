@@ -1,3 +1,4 @@
+require('dotenv').config();
 // importing express to set up the server
 const express = require('express');
 
@@ -9,6 +10,7 @@ const cors = require('cors');
 
 // loads environment variables from .env file
 require('dotenv').config();
+console.log('Loaded APP_ID:', process.env.NUTRITIONIX_APP_ID);
 
 // pulling in all the user-related routes (register/login)
 const userRoutes = require('./routes/userRoutes');

@@ -1,5 +1,15 @@
-# ignore node_modules and env file
 node_modules/
-.env
+*.log
 .DS_Store
+
+# Root .env
+.env
+
+# Vue frontend env
 client/.env
+
+# Backend env
+server/.env
+
+# Build output (if built locally)
+dist/
