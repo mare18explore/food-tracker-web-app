@@ -16,6 +16,7 @@ console.log('Loaded APP_ID:', process.env.NUTRITIONIX_APP_ID);
 const userRoutes = require('./routes/userRoutes');
 const foodRoutes = require('./routes/foodRoutes');
 
+
 // STARTING APP WORK
 // creating the express app
 const app = express();
@@ -33,6 +34,7 @@ app.use(express.json());
 // any route that starts with /api/users will go to userRoutes (e.g., /register, /login)
 app.use('/api/users', userRoutes);
 app.use('/api/foods', foodRoutes); // 
+app.use("/api/goals", require("./routes/goalRoutes"));
 
 
 // MongoDB connection/server work

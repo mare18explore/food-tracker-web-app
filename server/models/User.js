@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true // password will be hashed
+  },
+  goals: {
+    calories: { type: Number, default: 0 },
+    protein: { type: Number, default: 0 },
+    fats: { type: Number, default: 0 },
+    carbs: { type: Number, default: 0 }
   }
 });
 

@@ -6,6 +6,7 @@ import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import Dashboard from "../views/Dashboard.vue";
 import SearchResults from "../views/SearchResults.vue";
+import Goals from "../views/Goals.vue";
 
 // define app routes
 const routes = [
@@ -14,6 +15,7 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/dashboard", component: Dashboard },
   { path: "/results", component: SearchResults },
+  { path: "/goals", component: Goals },
 ];
 
 // create and export the router instance

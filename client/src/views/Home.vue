@@ -1,54 +1,64 @@
 <template>
-  <div class="home-container" v-if="loaded">
-    <h1>Welcome to the Food Tracker App</h1>
+  <div class="home-background">
+    <div class="home-container" v-if="loaded">
+      <router-link to="/goals">Set Goals</router-link>
+      <h1>Welcome to the Food Tracker App</h1>
+      <!-- closing tag for background image container -->
 
-    <!-- If the user isn't logged in, show login/register links -->
-    <p v-if="!isLoggedIn">
-      <router-link to="/login">Login</router-link>
-      or
-      <router-link to="/register">Register</router-link>
-    </p>
-
-    <!-- If logged in, show dashboard link, logout, and search -->
-    <div v-else>
-      <p>
-        You're logged in.
-        <router-link to="/dashboard">Go to Dashboard</router-link>
+      <!-- If the user isn't logged in, show login/register links -->
+      <p v-if="!isLoggedIn">
+        <router-link to="/login">Login</router-link>
+        or
+        <router-link to="/register">Register</router-link>
       </p>
-      <button @click="logout">Logout</button>
 
-      <!-- Search bar and submit button -->
-      <form @submit.prevent="searchFood" class="search-form">
-        <input v-model="query" placeholder="Search food..." />
-        <button type="submit">Search</button>
-      </form>
+      <!-- If logged in, show dashboard link, logout, and search -->
+      <div v-else>
+        <p>
+          You're logged in.
+          <router-link to="/dashboard"
+            >Go to Dashboard To Start Tracking</router-link
+          >
+        </p>
+        <button @click="logout">Logout</button>
 
-      <!-- Show search results after querying -->
-      <div v-if="results.length">
-        <h2>Search Results</h2>
-        <ul>
-          <!-- Loop through results and display each item -->
-          <li v-for="item in results" :key="item.food_name" class="result-item">
-            <p>{{ item.food_name }} — {{ item.nf_calories || "N/A" }} kcal</p>
+        <!-- Search bar and submit button -->
+        <form @submit.prevent="searchFood" class="search-form">
+          <input v-model="query" placeholder="Search food..." />
+          <button type="submit">Search</button>
+        </form>
 
-            <!-- Dropdown for selecting which meal this food belongs to -->
-            <select v-model="mealTypes[item.food_name]">
-              <option disabled value="">Select meal</option>
-              <option>Breakfast</option>
-              <option>Lunch</option>
-              <option>Dinner</option>
-              <option>Snack</option>
-            </select>
-
-            <!-- Add button gets disabled until meal type is selected -->
-            <button
-              @click="addFood(item.food_name)"
-              :disabled="!mealTypes[item.food_name]"
+        <!-- Show search results after querying -->
+        <div v-if="results.length">
+          <h2>Search Results</h2>
+          <ul>
+            <!-- Loop through results and display each item -->
+            <li
+              v-for="item in results"
+              :key="item.food_name"
+              class="result-item"
             >
-              Add
-            </button>
-          </li>
-        </ul>
+              <p>{{ item.food_name }} — {{ item.nf_calories || "N/A" }} kcal</p>
+
+              <!-- Dropdown for selecting which meal this food belongs to -->
+              <select v-model="mealTypes[item.food_name]">
+                <option disabled value="">Select meal</option>
+                <option>Breakfast</option>
+                <option>Lunch</option>
+                <option>Dinner</option>
+                <option>Snack</option>
+              </select>
+
+              <!-- Add button gets disabled until meal type is selected -->
+              <button
+                @click="addFood(item.food_name)"
+                :disabled="!mealTypes[item.food_name]"
+              >
+                Add
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -227,5 +237,17 @@ button {
   border-radius: 8px;
   border: 1px solid #ccc;
   text-align: left;
+}
+</style>
+<style>
+.home-background {
+  background-image: url("@/../public/foodBackground.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

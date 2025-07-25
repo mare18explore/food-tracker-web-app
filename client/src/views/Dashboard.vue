@@ -1,14 +1,27 @@
 <template>
   <div class="dashboard-container">
+    <router-link to="/goals">Set Goals</router-link>
     <h1><span style="font-size: 1.2em"></span> Dashboard</h1>
     <h2><span style="font-size: 1.1em">🍽️</span> Today's Meals</h2>
     <p v-if="isToday">Showing meals for: <strong>Today</strong></p>
     <p v-else>Showing meals for: {{ selectedDate }}</p>
+    <p
+      v-if="macroRemaining"
+      :class="{
+        negative: macroRemaining.calories < 0,
+        positive: macroRemaining.calories > 0,
+      }"
+    >
+      Calories: {{ macroRemaining.calories }}
+    </p>
     <div class="date-nav">
       <button @click="prevDate">Previous ({{ formatRelativeDate(-1) }})</button>
-      <span>{{ formattedDate() }}</span>
+
+      <span class="date-display">{{ formattedDate() }}</span>
+
       <button @click="nextDate">Next ({{ formatRelativeDate(1) }})</button>
     </div>
+
     <button v-if="!isToday" @click="resetDate">Go Back To Today</button>
     <!-- Search for food using Nutritionix API -->
     <div class="nutrition-search">
@@ -142,6 +155,22 @@
       <p><strong>Fat:</strong> {{ totalFat }} g</p>
       <p><strong>Carbs:</strong> {{ totalCarbs }} g</p>
     </section>
+
+    <div v-if="macroRemaining" class="macro-remaining">
+      <h3>Remaining</h3>
+      <p :class="{ negative: macroRemaining.calories < 0 }">
+        Calories: {{ macroRemaining.calories }}
+      </p>
+      <p :class="{ negative: macroRemaining.protein < 0 }">
+        Protein: {{ macroRemaining.protein }} g
+      </p>
+      <p :class="{ negative: macroRemaining.fats < 0 }">
+        Fats: {{ macroRemaining.fats }} g
+      </p>
+      <p :class="{ negative: macroRemaining.carbs < 0 }">
+        Carbs: {{ macroRemaining.carbs }} g
+      </p>
+    </div>
   </div>
 </template>
 
@@ -168,11 +197,26 @@ export default {
       )
         .toISOString()
         .substring(0, 10),
+      macroGoals: null,
+      macroRemaining: null,
+      macroTotals: {
+        calories: 0,
+        protein: 0,
+        fats: 0,
+        carbs: 0,
+      },
     };
   },
   watch: {
     selectedDate() {
       this.fetchFoods();
+      this.fetchMacroGoals();
+    },
+    foodEntries() {
+      this.calculateMacroTotals(); // recalculate when foods change
+    },
+    macroGoals() {
+      this.calculateMacroTotals(); // recalculate when goals change too
     },
   },
 
@@ -219,12 +263,53 @@ export default {
     },
   },
 
-  mounted() {
+  async mounted() {
     // Load existing food entries on page load
-    this.fetchFoods();
+    await this.fetchFoods(); // Load user's food
+    await this.fetchMacroGoals(); // Load macro goals from backend
   },
 
   methods: {
+    calculateMacroTotals() {
+      // example — update based on actual structure of your food entries
+      this.macroTotals = {
+        calories: 0,
+        protein: 0,
+        fats: 0,
+        carbs: 0,
+      };
+      // Loop through all food entries and sum up each macro
+      this.foodEntries.forEach((entry) => {
+        this.macroTotals.calories += entry.calories;
+        this.macroTotals.protein += entry.protein;
+        this.macroTotals.fats += entry.fats;
+        this.macroTotals.carbs += entry.carbs;
+      });
+      // After calculating totals, update the remaining values but with a checker incase
+      if (!this.macroGoals) {
+        console.log("No goals found for this user.");
+        this.macroRemaining = null;
+        return;
+      }
+      this.calculateRemaining();
+    },
+    calculateRemaining() {
+      // If macro goals aren't loaded yet, skip calculating remaining
+      if (!this.macroGoals) {
+        this.macroRemaining = null;
+        return;
+      }
+      // Subtract totals from goals to get the remaining macros
+      this.macroRemaining = {
+        calories: this.macroGoals.calories - this.macroTotals.calories,
+        protein: this.macroGoals.protein - this.macroTotals.protein,
+        fats: this.macroGoals.fats - this.macroTotals.fats,
+        carbs: this.macroGoals.carbs - this.macroTotals.carbs,
+      };
+      console.log("macroGoals:", this.macroGoals);
+      console.log("macroTotals:", this.macroTotals);
+    },
+
     // Formats the currently selected date for display
     formattedDate() {
       const date = new Date(this.selectedDate + "T00:00:00");
@@ -373,6 +458,8 @@ export default {
 
         const data = await response.json();
         this.foodEntries = [...data];
+        // must call to claculate remaining totals
+        this.calculateMacroTotals();
       } catch (err) {
         console.error("Error fetching foods:", err);
       }
@@ -388,6 +475,31 @@ export default {
         this.searchResults = data;
       } catch (err) {
         console.error("Search failed:", err);
+      }
+    },
+    async fetchMacroGoals() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch("http://localhost:5050/api/goals", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          console.warn("No saved goals found or failed to fetch.");
+          return;
+        }
+
+        const data = await res.json();
+        this.macroGoals = data;
+
+        // Only calculate totals once goals are loaded
+        this.calculateMacroTotals();
+      } catch (err) {
+        console.error("Error fetching goals from backend:", err);
       }
     },
   },
@@ -552,20 +664,31 @@ ul li:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  flex-wrap: wrap; /* allow responsive wrap */
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
-.date-nav button {
-  padding: 0.4rem 0.8rem;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.date-display {
+  font-weight: bold;
+  padding: 0.5rem;
+}
+.macro-remaining {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f4f4f4;
+  border-radius: 8px;
 }
 
-.date-nav button:hover {
-  background-color: #2980b9;
+.macro-remaining p {
+  margin: 0.3rem 0;
+  font-weight: 500;
+}
+
+.negative {
+  color: red;
+}
+.positive {
+  color: green;
 }
 </style>
