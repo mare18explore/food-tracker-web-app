@@ -164,8 +164,8 @@
       <p :class="{ negative: macroRemaining.protein < 0 }">
         Protein: {{ macroRemaining.protein }} g
       </p>
-      <p :class="{ negative: macroRemaining.fats < 0 }">
-        Fats: {{ macroRemaining.fats }} g
+      <p :class="{ negative: macroRemaining.fat < 0 }">
+        Fat: {{ macroRemaining.fat }} g
       </p>
       <p :class="{ negative: macroRemaining.carbs < 0 }">
         Carbs: {{ macroRemaining.carbs }} g
@@ -202,7 +202,7 @@ export default {
       macroTotals: {
         calories: 0,
         protein: 0,
-        fats: 0,
+        fat: 0,
         carbs: 0,
       },
     };
@@ -275,14 +275,14 @@ export default {
       this.macroTotals = {
         calories: 0,
         protein: 0,
-        fats: 0,
+        fat: 0,
         carbs: 0,
       };
       // Loop through all food entries and sum up each macro
       this.foodEntries.forEach((entry) => {
         this.macroTotals.calories += entry.calories;
         this.macroTotals.protein += entry.protein;
-        this.macroTotals.fats += entry.fats;
+        this.macroTotals.fat += entry.fat;
         this.macroTotals.carbs += entry.carbs;
       });
       // After calculating totals, update the remaining values but with a checker incase
@@ -303,7 +303,7 @@ export default {
       this.macroRemaining = {
         calories: this.macroGoals.calories - this.macroTotals.calories,
         protein: this.macroGoals.protein - this.macroTotals.protein,
-        fats: this.macroGoals.fats - this.macroTotals.fats,
+        fat: this.macroGoals.fat - this.macroTotals.fat,
         carbs: this.macroGoals.carbs - this.macroTotals.carbs,
       };
       console.log("macroGoals:", this.macroGoals);

@@ -3,10 +3,10 @@ const User = require("../models/User");
 // Save goals to the authenticated user
 exports.saveGoals = async (req, res) => {
   try {
-    const { calories, protein, fats, carbs } = req.body;
+    const { calories, protein, fat, carbs } = req.body;
     const user = await User.findById(req.user.id);
 
-    user.goals = { calories, protein, fats, carbs };
+    user.goals = { calories, protein, fat, carbs };
     await user.save();
 
     console.log(" Saved goals for user:", user.email, user.goals);

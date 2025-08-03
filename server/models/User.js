@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   goals: {
     calories: { type: Number, default: 0 },
     protein: { type: Number, default: 0 },
-    fats: { type: Number, default: 0 },
+    fat: { type: Number, default: 0 },
     carbs: { type: Number, default: 0 }
   }
 });

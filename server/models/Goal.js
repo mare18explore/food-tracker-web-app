@@ -16,7 +16,7 @@ const goalSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    fats: {
+    fat: {
       type: Number,
       required: true,
     },

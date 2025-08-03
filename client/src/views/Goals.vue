@@ -54,7 +54,7 @@
       <h3>Your Daily Macro Goals</h3>
       <p>Calories: {{ macroGoals.calories }}</p>
       <p>Protein: {{ macroGoals.protein }} g</p>
-      <p>Fats: {{ macroGoals.fats }} g</p>
+      <p>Fat: {{ macroGoals.fat }} g</p>
       <p>Carbs: {{ macroGoals.carbs }} g</p>
     </div>
   </div>
@@ -93,14 +93,14 @@ export default {
 
       // Macro breakdown: 40% carbs, 30% protein, 30% fats
       const protein = Math.round((0.3 * calories) / 4);
-      const fats = Math.round((0.3 * calories) / 9);
+      const fat = Math.round((0.3 * calories) / 9);
       const carbs = Math.round((0.4 * calories) / 4);
 
       // Set and display macro goals
       this.macroGoals = {
         calories: Math.round(calories),
         protein,
-        fats,
+        fat,
         carbs,
       };
 
